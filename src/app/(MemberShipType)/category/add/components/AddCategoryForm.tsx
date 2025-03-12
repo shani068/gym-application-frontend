@@ -21,10 +21,19 @@ const categorySchema = z.object({
 
 type Inputs = z.infer<typeof categorySchema>
 
+interface ICategory {
+    name: string;
+    description: string;
+}
+interface ApiResponse{
+    status: number;
+    message: string
+}
+
 export default function AddCategoryForm() {
     const router = useRouter()
     const { toastSuccess, toastError } = useToast()
-    const { mutate, isLoading } = usePostRequest(`${API_BASE_URL}/memberShipTypes/add-category`)
+    const { mutate, isPending } = usePostRequest<ApiResponse,ICategory>(`${API_BASE_URL}/memberShipTypes/add-category`)
 
     const {
         register,
@@ -35,13 +44,15 @@ export default function AddCategoryForm() {
     } = useForm<Inputs>({
         resolver: zodResolver(categorySchema),
     })
-    const onSubmit: SubmitHandler<Inputs> = (formData) => {
+    const onSubmit: SubmitHandler<Inputs> = (formData: ICategory) => {
         mutate(formData, {
             onSuccess: (data) => {
                 // console.log("data", data)
                 toastSuccess(data?.message)
                 reset()
+                router.push("/category/list")
             },
+
             onError: (error: any) => {
                 console.log("error", error)
                 if (error?.response?.status === 409) {
@@ -105,7 +116,7 @@ export default function AddCategoryForm() {
                                 className="bg-teal-500 hover:bg-teal-600 min-w-[100px]"
                             >
                                 {
-                                    isLoading ? "Saving..." : "Save"
+                                    isPending ? "Saving..." : "Save"
                                 }
                             </Button>
                         </div>

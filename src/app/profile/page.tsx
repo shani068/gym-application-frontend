@@ -1,8 +1,9 @@
+import { withAuth } from "@/components/HOC/with-auth";
 import ProfileEditForm from "./ProfileEditForm";
 
 
 
-export default function ProfileEditPage() {
+function ProfileEditPage() {
   return (
     <div className="container mx-auto py-8 px-4">
       <ProfileEditForm />
@@ -10,3 +11,4 @@ export default function ProfileEditPage() {
   )
 }
 
+export default withAuth(ProfileEditPage);

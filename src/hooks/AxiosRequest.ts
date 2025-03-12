@@ -1,51 +1,50 @@
 import { useAuth } from '@/contexts/auth-context';
-import axios, { AxiosRequestConfig } from 'axios';
-import { useMutation, useQuery } from 'react-query';
+import axios, { AxiosRequestConfig, AxiosError } from 'axios';
+import { useQuery, useMutation } from '@tanstack/react-query';
 
+export const usePostRequest = <T, U=void>(API_URL: string) => {
+  return useMutation<T, AxiosError, U>({
+    mutationFn: async (formData) => {
+      const response = await axios.post(API_URL, formData, {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })
 
-export const usePostRequest = <T>(API_URL: string) => {
-  const mutation = useMutation(async (formData: T) => {
-    const response = await axios.post(API_URL, formData, {
-      headers: {
-        "Content-Type": "application/json"
-      }
-    })
-
-    return response.data;
-  });
-
-  return mutation;
+      return response.data;
+    }
+  })
 }
 
-export const usePutRequest = <T>(API_URL: string) => {
+export const usePutRequest = <T, U=unknown>(API_URL: string) => {
   const { token } = useAuth();
 
-  const mutation = useMutation(async (formData: T) => {
-    const response = await axios.put(API_URL, formData, {
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      }
-    })
-
-    return response.data;
-  });
-
-  return mutation;
+  return useMutation<T, AxiosError, U>({
+    mutationFn: async (formData) => {
+      const response = await axios.put<T>(API_URL, formData, {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        }
+      })
+      return response.data;
+    }
+  })
 }
 
-export const usePostMultiPartRequest = <T>(API_URL: string) => {
-  const mutation = useMutation(async (formData: T) => {
-    const response = await axios.post(API_URL, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    })
+export const usePostMultiPartRequest = <T, U extends FormData = FormData>(API_URL: string) => {
 
-    return response.data;
-  });
+  return useMutation<T, AxiosError, U>({
+    mutationFn: async (formData) => {
+      const resposne = await axios.post<T>(API_URL, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
 
-  return mutation;
+      return resposne.data;
+    }
+  })
 }
 
 // export const usePutRequest = <T>(API_URL: string) => {
@@ -62,49 +61,60 @@ export const usePostMultiPartRequest = <T>(API_URL: string) => {
 // };
 
 export const useDeleteRequest = (API_URL: string) => {
-  const mutation = useMutation(async (id: number) => {
-    const response = await axios.delete(`${API_URL}/${id}`, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    return response.data;
-  });
 
-  return mutation;
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const response = await axios.delete(`${API_URL}/${id}`, {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })
+
+      return response.data;
+    }
+  })
+  // const mutation = useMutation(async (id: number) => {
+  //   const response = await axios.delete(`${API_URL}/${id}`, {
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //   });
+  //   return response.data;
+  // });
+
+  // return mutation;
 };
+
+
 
 export const useGetRequest = <T>(
   API_URL: string,
   queryKey: string,
-  params?: Record<string, any>
+  params?: { id?: string }
 ) => {
-  // Build the final URL:
-  // If an id is provided in params, append it to the API_URL; otherwise, use the API_URL as-is.
-  const finalUrl = params?.id ? `${API_URL}${params.id}` : API_URL;
-  const {token} = useAuth();
-  console.log("get token", token)
-  // Determine if the query should be enabled:
-  // - If params is provided and contains an id, then enabled is true.
-  // - If no params are provided, then enabled should also be true.
-  const isEnabled =( params ? !!params.id : true) && !!token;
+  const { token } = useAuth();
+  
+  const id = params?.id;
+  const isEnabled = (params ? !!id : true) && !!token;
 
-  const query = useQuery<T>(
-    params?.id ? [queryKey, params.id] : [queryKey], // Unique query key
-    async () => {
-      const response = await axios.get(finalUrl, {
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-         },
+  const query = useQuery<T, AxiosError>({
+    queryKey: [queryKey, id].filter(Boolean),
+    queryFn: async ({ queryKey, signal }) => {
+      const [, queryId] = queryKey;
+      const url = queryId ? `${API_URL}/${queryId}` : API_URL;
+      
+      const response = await axios.get<T>(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        signal,
       });
       return response.data;
     },
-    {
-      refetchOnWindowFocus: false,
-      enabled: isEnabled,
-    }
-  );
+    refetchOnWindowFocus: false,
+    enabled: isEnabled,
+  });
 
   return query;
 };

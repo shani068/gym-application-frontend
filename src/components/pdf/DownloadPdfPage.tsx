@@ -64,7 +64,7 @@ export const MembersPDFDocument = ({ data }: { data: IMember[] | undefined }) =>
     </Document>
 )
 
-export const SpecializationPDFDocument = ({ data }: { data: IRole[] | undefined }) => (
+export const GeneralPdfDocument = ({ data }: { data: IRole[] | undefined }) => (
     <Document>
         {/* <Text style={styles.title}>Membership List Report</Text> */}
         <Page size="A4" style={styles.page}>

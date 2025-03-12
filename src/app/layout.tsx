@@ -6,7 +6,7 @@ import "./globals.css";
 import { ToastContainer } from 'react-toastify';
 import Navbar from "@/components/Navbar";
 import { SidebarProvider } from '@/components/ui/sidebar'
-import { QueryClientProvider, QueryClient } from "react-query";
+import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { AuthProvider } from "@/contexts/auth-context";
 import { usePathname } from "next/navigation";
 

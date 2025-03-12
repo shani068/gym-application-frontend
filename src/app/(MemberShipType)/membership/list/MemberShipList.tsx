@@ -10,7 +10,7 @@ import Link from 'next/link'
 import { useGetRequest } from '@/hooks/AxiosRequest'
 import { API_BASE_URL } from '@/lib/constant'
 import { PDFDownloadLink } from '@react-pdf/renderer'
-import { MembersPDFDocument } from '@/components/pdf/MemberShipListPdf'
+import { MembersPDFDocument } from '@/components/pdf/DownloadPdfPage'
 
 export interface IMember {
     _id: number,
@@ -168,7 +168,7 @@ export default function MembershipList() {
                                         <TableCell>{index + 1}</TableCell>
                                         <TableCell>{member.name}</TableCell>
                                         <TableCell>{member.period}</TableCell>
-                                        <TableCell>{member.category.name}</TableCell>
+                                        <TableCell>{member.category?.name}</TableCell>
                                         <TableCell>${member.amount}</TableCell>
                                         <TableCell>
                                             <div className="flex gap-2">

@@ -12,13 +12,12 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import Image from 'next/image'
 import Link from 'next/link'
 import { useGetRequest } from '@/hooks/AxiosRequest'
 import { API_BASE_URL } from '@/lib/constant'
 import { PDFDownloadLink } from '@react-pdf/renderer'
 import { FileDown, Printer } from 'lucide-react'
-import { SpecializationPDFDocument } from '@/components/pdf/MemberShipListPdf'
+import { GeneralPdfDocument } from '@/components/pdf/DownloadPdfPage'
 
 export interface IRole {
     _id: string
@@ -81,7 +80,7 @@ export default function SpecializationList() {
 
             <div className="flex gap-2 mb-4">
                 <PDFDownloadLink
-                    document={<SpecializationPDFDocument data={sortedStaff} />}
+                    document={<GeneralPdfDocument data={sortedStaff} />}
                     fileName="membership_list.pdf"
                 >
                     {({ loading }) => (

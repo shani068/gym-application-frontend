@@ -11,9 +11,12 @@ import { useDeleteRequest, useGetRequest } from '@/hooks/AxiosRequest'
 import { API_BASE_URL } from '@/lib/constant'
 import PreLoader from '@/components/PreLoader'
 import { useToast } from '@/hooks/useToast'
+import { useQueryClient } from '@tanstack/react-query'
+import { PDFDownloadLink } from '@react-pdf/renderer'
+import { GeneralPdfDocument } from '@/components/pdf/DownloadPdfPage'
 
 interface ICategory {
-    _id: number
+    _id: string
     name: string
 }
 export interface IGetRequestResponse {
@@ -33,7 +36,8 @@ export default function CategoryList() {
     const [sortOrder, setSortOrder] = useState<SortOrder>('asc')
     const { toastSuccess, toastError } = useToast()
     const { data, isLoading, error }: IGetRequestResponse = useGetRequest(`${API_BASE_URL}/memberShipTypes/category-list`, 'categoryList')
-    const {mutate, isLoading: deleteLoading} = useDeleteRequest(`${API_BASE_URL}/memberShipTypes/delete-category`)
+    const { mutate, isPending: deleteLoading } = useDeleteRequest(`${API_BASE_URL}/memberShipTypes/delete-category`)
+    const queryClient = useQueryClient();
     const initialData = data?.data;
     // console.log(data, error)
     const handleSort = (key: SortKey) => {
@@ -45,10 +49,15 @@ export default function CategoryList() {
         }
     }
 
-    const deleteEvent = (id: number) => {
+    const deleteEvent = (id: string) => {
         mutate(id, {
+
             onSuccess: (data) => {
                 toastSuccess(data?.message)
+                queryClient.invalidateQueries({
+                    queryKey: ['categoryList']
+                })
+
             },
             onError: (error: any) => {
                 console.log("error", error)
@@ -79,21 +88,32 @@ export default function CategoryList() {
             {isLoading || deleteLoading && <PreLoader />}
             {error && <p>Error: {error}</p>}
             <Card className="w-full max-w-6xl mx-auto">
-                <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+                <CardHeader className=" flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
                     <CardTitle className="text-2xl font-bold">Category List</CardTitle>
-                    <Button className="bg-teal-500 hover:bg-teal-600">
+                    <Button className="bg-teal-500 print:hidden hover:bg-teal-600">
                         <Link href="/category/add">Add New Category</Link>
                     </Button>
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-4">
-                        <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
+                        <div className="flex flex-col print:hidden sm:flex-row sm:justify-between gap-4">
                             <div className="flex gap-2">
-                                <Button variant="outline" className="flex items-center gap-2">
-                                    <FileDown className="w-4 h-4" />
-                                    PDF
-                                </Button>
-                                <Button variant="outline" className="flex items-center gap-2">
+                                <PDFDownloadLink
+                                    document={<GeneralPdfDocument data={filteredData} />}
+                                    fileName="category_list.pdf"
+                                >
+                                    {({ loading }) => (
+                                        <Button
+                                            variant="outline"
+                                            className="flex items-center gap-2"
+                                            disabled={loading || isLoading}
+                                        >
+                                            <FileDown className="w-4 h-4" />
+                                            PDF
+                                        </Button>
+                                    )}
+                                </PDFDownloadLink>
+                                <Button variant="outline" onClick={() => window.print()} className="flex items-center gap-2">
                                     <Printer className="w-4 h-4" />
                                     Print
                                 </Button>
@@ -141,15 +161,12 @@ export default function CategoryList() {
                                             <TableCell>{member.name}</TableCell>
                                             <TableCell>
                                                 <div className="flex items-center gap-2">
-                                                    <Button size="icon" variant="ghost" className="h-8 w-8 text-green-600">
-                                                        <Eye className="h-4 w-4" />
-                                                    </Button>
                                                     <Button size="icon" variant="ghost" className="h-8 w-8 text-blue-600">
                                                         <Link href={`/category/edit/${member._id}`} >
                                                             <Pencil className="h-4 w-4" />
                                                         </Link>
                                                     </Button>
-                                                    
+
                                                     <Button onClick={() => deleteEvent(member._id)} size="icon" variant="ghost" className="h-8 w-8 text-red-600">
                                                         <Trash2 className="h-4 w-4" />
                                                     </Button>
@@ -161,7 +178,7 @@ export default function CategoryList() {
                             </Table>
                         </div>
 
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between print:hidden">
                             <p className="text-sm text-muted-foreground">
                                 Showing {filteredData?.length} of {initialData?.length} entries
                             </p>

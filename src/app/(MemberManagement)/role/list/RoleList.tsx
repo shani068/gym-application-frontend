@@ -16,7 +16,7 @@ import Link from 'next/link'
 import { useGetRequest } from '@/hooks/AxiosRequest'
 import { API_BASE_URL } from '@/lib/constant'
 import { PDFDownloadLink } from '@react-pdf/renderer'
-import { RolePDFDocument } from '@/components/pdf/MemberShipListPdf'
+import { RolePDFDocument } from '@/components/pdf/DownloadPdfPage'
 import { FileDown, Printer } from 'lucide-react'
 
 interface IRole {

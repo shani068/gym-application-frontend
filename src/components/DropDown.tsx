@@ -1,42 +1,46 @@
 import React from 'react';
 import type { MenuProps } from 'antd';
 import { Button, Dropdown, Space } from 'antd';
+import Link from 'next/link';
+import { jwtDecode } from "jwt-decode";
+import { useAuth } from '@/contexts/auth-context';
 
 const items: MenuProps['items'] = [
   {
     key: '1',
     label: (
-      <a target="_blank" rel="noopener noreferrer" href="https://www.antgroup.com">
-        1st menu item
-      </a>
+      <Link rel="noopener noreferrer" href="/profile">
+        Profile
+      </Link>
     ),
   },
   {
     key: '2',
     label: (
-      <a target="_blank" rel="noopener noreferrer" href="https://www.aliyun.com">
-        2nd menu item
-      </a>
-    ),
-  },
-  {
-    key: '3',
-    label: (
-      <a target="_blank" rel="noopener noreferrer" href="https://www.luohanacademy.com">
-        3rd menu item
-      </a>
+      <Link rel="noopener noreferrer" href="https://www.aliyun.com">
+        Logout
+      </Link>
     ),
   },
 ];
 
-const DropDown: React.FC = () => (
-  <Space direction="vertical">
+// console.log("decoded token ", decoded)
+const DropDown: React.FC = () => {
+  const { token } = useAuth();
+  let username = '';
+  if (token) {
+    const decoded: { username: string } = jwtDecode(token);
+    username = decoded.username;
+  }
+  return (
+    <Space direction = "vertical" >
     <Space wrap>
       <Dropdown menu={{ items }} placement="bottom">
-        <Button>Hi, John Doe</Button>
+        <Button className='capitalize'>Hi, {username}</Button>
       </Dropdown>
     </Space>
   </Space>
-);
+  )
+};
 
 export default DropDown;

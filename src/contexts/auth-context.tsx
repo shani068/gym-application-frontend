@@ -22,6 +22,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
 
+    useEffect(() => {
+        const storedToken = sessionStorage.getItem("token");
+        if(storedToken) setToken(storedToken);
+        setIsLoading(false);
+    }, []);
+
     const login = (newToken: string) => {
         sessionStorage.setItem("token", newToken);
         setToken(newToken);
@@ -33,21 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         router.push("/login");
     };
 
-    useEffect(() => {
-        const validateToken = () => {
-            const storedToken = sessionStorage.getItem("token");
-            // Add actual token validation logic here (e.g., check expiration)
-            return storedToken ? storedToken : null;
-        };
-
-        const checkAuth = () => {
-            const validToken = validateToken();
-            setToken(validToken);
-            setIsLoading(false);
-        };
-
-        checkAuth();
-    }, []);
+    
 
     return (
         <AuthContext.Provider value={{ token, isLoading, login, logout }}>

@@ -25,17 +25,20 @@ interface ApiCategoryResponse {
     name: string;
     description: string;
   }
-  
+interface ApiCategoryResponse {
+    status: number;
+    message: string;
+}
 
 
 export default function EditCategoryForm() {
     const router = useRouter()
     const { toastSuccess, toastError } = useToast()
     const searchParams = useParams()
-    const { data } = useGetRequest<ApiCategoryResponse>(`${API_BASE_URL}/memberShipTypes/category/`, 'categoryList', { id: searchParams.id })
+    const { data } = useGetRequest<ApiCategoryResponse>(`${API_BASE_URL}/memberShipTypes/category/`, 'categoryList', { id: searchParams.id as string })
     // console.log("searchParams", data)
     // console.log("id", searchParams.id)
-    const {mutate, isLoading: submitLoading} = usePutRequest(`${API_BASE_URL}/memberShipTypes/update-category`)
+    const {mutate, isPending: submitLoading} = usePutRequest<ApiCategoryResponse>(`${API_BASE_URL}/memberShipTypes/update-category`)
     const {
         register,
         handleSubmit,

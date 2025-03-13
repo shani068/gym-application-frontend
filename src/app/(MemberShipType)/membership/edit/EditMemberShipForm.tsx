@@ -1,6 +1,6 @@
 "use client"
 
-import { useRouter } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -9,12 +9,13 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { z } from "zod"
-import { useGetRequest, usePostRequest } from "@/hooks/AxiosRequest"
+import { useGetRequest, usePostRequest, usePutRequest } from "@/hooks/AxiosRequest"
 import { API_BASE_URL } from "@/lib/constant"
 import type { IGetRequestResponse } from "@/app/(MemberShipType)/category/list/CategoryList"
 import { useToast } from "@/hooks/useToast"
-import { useForm, Controller } from "react-hook-form"
+import { useForm, Controller, SubmitHandler } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useEffect } from "react"
 
 const addMemberShipSchema = z.object({
     name: z.string().min(3, "Name must be at least 3 characters"),
@@ -25,19 +26,27 @@ const addMemberShipSchema = z.object({
 })
 
 type IAddMemberShip = z.infer<typeof addMemberShipSchema>
-interface ApiMemberShipResponse {
+interface IUpdateMemberShipResponse{
     status: number;
     message: string;
 }
+interface IMemberShipData {
+    name: string;
+    categoryName: string;
+    period: number;
+    amount: number;
+    description: string;
+  }
 
-export default function AddMembershipForm() {
+export default function EditMembershipForm() {
     const router = useRouter()
     const { toastSuccess, toastError } = useToast()
+    const searchParams = useParams();
     const {
         data,
-        error: categoryListError,
-    }: IGetRequestResponse = useGetRequest(`${API_BASE_URL}/memberShipTypes/category-list`, "categoryList")
-    const { mutate, isPending: isLoadingMemberShip } = usePostRequest<ApiMemberShipResponse,IAddMemberShip>(`${API_BASE_URL}/memberShipTypes/add-membership`)
+        error: memberShipListError,
+    }: IGetRequestResponse = useGetRequest(`${API_BASE_URL}/memberShipTypes/memberShip-detail`, "memBerShipList", { id: searchParams.id as string })
+    const {mutate, isPending: isLoadingMemberShip} = usePutRequest<IUpdateMemberShipResponse>(`${API_BASE_URL}/memberShipTypes/memberShip-detail`)
     const {
         control,
         register,
@@ -49,10 +58,20 @@ export default function AddMembershipForm() {
     })
 
     const categories = data?.data || []
+    console.log("categories", data)
 
-    const onSubmit = (data: IAddMemberShip) => {
+    useEffect(()=>{
+        reset({
+            name: data?.data?.name,
+            categoryName: data?.data?.categoryName,
+            period: data?.data?.period,
+            amount: data?.data?.amount,
+            description: data?.data?.description,
+        })
+    },[data, reset])
+    const onSubmit: SubmitHandler<IMemberShipData> = (formData) => {
         // console.log(data)
-        mutate(data,
+        mutate(formData, 
             {
                 onSuccess: (data) => {
                     toastSuccess(data?.message)
@@ -65,12 +84,12 @@ export default function AddMembershipForm() {
                 }
             }
         )
-
+        
     }
 
-    if (categoryListError) {
-        console.error(categoryListError)
-        toastError("Failed to fetch category list!")
+    if (memberShipListError) {
+        console.error(memberShipListError)
+        toastError("Failed to fetch MemberShip list!")
     }
 
     return (

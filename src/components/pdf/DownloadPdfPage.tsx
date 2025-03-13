@@ -1,6 +1,6 @@
 import { IRole } from '@/app/(MemberManagement)/specialization/list/SpecializationList'
 import { IMember } from '@/app/(MemberShipType)/membership/list/MemberShipList'
-import { Document, Page, View, Text, StyleSheet, PDFDownloadLink } from '@react-pdf/renderer'
+import { Document, Page, View, Text, StyleSheet } from '@react-pdf/renderer'
 
 const styles = StyleSheet.create({
     page: {
@@ -55,7 +55,7 @@ export const MembersPDFDocument = ({ data }: { data: IMember[] | undefined }) =>
                         <Text style={styles.tableCell}>{index + 1}</Text>
                         <Text style={styles.tableCell}>{member.name}</Text>
                         <Text style={styles.tableCell}>{member.period}</Text>
-                        <Text style={styles.tableCell}>{member.category.name}</Text>
+                        <Text style={styles.tableCell}>{member.category?.name}</Text>
                         <Text style={styles.tableCell}>${member.amount}</Text>
                     </View>
                 ))}

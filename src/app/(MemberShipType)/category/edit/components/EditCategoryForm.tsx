@@ -35,8 +35,8 @@ export default function EditCategoryForm() {
     const router = useRouter()
     const { toastSuccess, toastError } = useToast()
     const searchParams = useParams()
-    const { data } = useGetRequest<ApiCategoryResponse>(`${API_BASE_URL}/memberShipTypes/category/`, 'categoryList', { id: searchParams.id as string })
-    // console.log("searchParams", data)
+    const { data } = useGetRequest<ApiCategoryResponse>(`${API_BASE_URL}/memberShipTypes/category`, 'categoryList', { id: searchParams.id as string })
+    console.log("searchParams", data)
     // console.log("id", searchParams.id)
     const {mutate, isPending: submitLoading} = usePutRequest<ApiCategoryResponse>(`${API_BASE_URL}/memberShipTypes/update-category`)
     const {
